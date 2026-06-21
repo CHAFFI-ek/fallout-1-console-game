@@ -1,4 +1,5 @@
 from Fallout_Engine.special import Player 
+from Fallout_Engine.locations import Sector
 
 class Loop:
     def __init__(self):
@@ -13,6 +14,27 @@ class Loop:
         self.agi = 1
         self.luc = 1
         self.player = None
+
+        self.game_locations = {
+            "Убежище 13": {
+                "Пещера": Sector("Пещера убежища 13", "Темная и сырая пещара перед огромной Гермодверью с надписью 13")
+            },
+            "Убежище 15": {
+                "Улица": Sector("Улица Убежища 15", "Какое-то заброшенное здание посреди пустыни, внутри явно что-то есть")
+            },
+            "Шэйди Сэндс": {
+                "Улица": Sector("Улица Шэйди Сэндс", "Небольное поселение из песчанных кирпичей"),
+                "Магазин": Sector("Магазин Шэйди Сэндс", "Торговый пост. На полках лежит довоенный товар, за прилавком хмурый торговец")
+            }
+        }
+
+        self.world_map = {
+            "Убежище 13": True,
+            "Убежище 15": True,
+            "Шэйди Сэндс": False
+        }
+
+        self.current_sector = None
 
     def run(self):
         while self.running:
@@ -31,18 +53,33 @@ class Loop:
                 else:
                     print("Введено неизвестное значение")
             elif self.state == "EXPLORE":
-                print("=========================")
-                print("1. Открыть pip-boy 2000 \n2. Открыть инвентарь \n3. Выйти в меню")
+                print(f"===== Локация: {self.current_sector.name} =====")
+                print(self.current_sector.description)
+
+                if self.current_sector.name == "Улица Шэйди Сэндс":
+                    print("--> 5. Войти в магазин")
+                elif self.current_sector.name == "Магазин Шэйди Сэндс":
+                    print("--> 5. Выйти на улицу")
+
+                print("1. Открыть pip-boy 2000 \n2. Открыть инвентарь \n3. Глобальная карта \n4. Выйти в меню")
                 choice1 = input("Введите действие: ")
                 print("=========================")
+
                 if choice1 == "1":
                     self.state = "PIP_BOY"
                 elif choice1 == "2":
                     print("Пока недоступно")
                 elif choice1 == "3":
+                    self.state = "WORLD_MAP"
+                elif choice1 == "4":
                     self.state = "MAIN_MENU"
+                elif choice1 == "5" and self.current_sector.name == "Улица Шэйди Сэндс":
+                    self.current_sector = self.game_locations["Шэйди Сэндс"]["Магазин"]
+                elif choice1 == "5" and self.current_sector.name == "Магазин Шэйди Сэндс":
+                    self.current_sector = self.game_locations["Шэйди Сэндс"]["Улица"]
                 else:
                     print("Введено неизвестное значение")
+
             elif self.state == "PIP_BOY":
                 print("===== PIP-BOY 2000 =====")
                 print("1. [STATUS] Характеристики персонажа")
@@ -184,12 +221,59 @@ class Loop:
                         if self.points == 0:
                             name = input("Введите имя вашего персонажа: ")
                             self.player = Player(name, self.st, self.per, self.end, self.cha, self.inte, self.agi, self.luc)
+                            self.current_sector = self.game_locations["Убежище 13"]["Пещера"]
                             self.state = "EXPLORE"
                             break
                         else:
                             print(f"Вы распределили не все очки! Осталось: {self.points}")
                     else:
                         print("Введено неизвестное значение")
+            elif self.state == "WORLD_MAP":
+                print("===== Глобальная карта =====")
+                print("Доступные локации на радаре:")
+                available_choices = []
+
+                for loc_name, opened in self.world_map.items():
+                    if opened:
+                        available_choices.append(loc_name)
+
+                for index, loc_name in enumerate(available_choices, 1):
+                    print(f"{index}. Путешествовать в {loc_name}")
+
+                back_button_index = len(available_choices) + 1
+                print(f"{back_button_index}. Вернуться назад в текущую локацию")
+
+                choice_map = input("Введите номер действия: ")
+                print("=========================")
+
+                if choice_map == str(back_button_index):
+                    self.state = "EXPLORE"
+                else:
+                    chosen_location = None
+                    for index, loc_name in enumerate(available_choices, 1):
+                        if choice_map == str(index):
+                            chosen_location = loc_name
+                            break
+
+                    if chosen_location == "Убежище 13":
+                        self.current_sector = self.game_locations["Убежище 13"]["Пещера"]
+                        self.state = "EXPLORE"
+
+                    elif chosen_location == "Убежище 15":
+                        if self.world_map["Шэйди Сэндс"] == False:
+                            self.world_map["Шэйди Сэндс"] = True
+                            print("Вы нашли новое поселение: Шэйди Сэндс")
+                        
+                        self.current_sector = self.game_locations["Убежище 15"]["Улица"]
+                        self.state = "EXPLORE"
+
+                    elif chosen_location == "Шэйди Сэндс":
+                        self.current_sector = self.game_locations["Шэйди Сэндс"]["Улица"]
+                        self.state = "EXPLORE"
+                    else:
+                        print("Неизвестное действие")
+
+                
                     
 
                 
