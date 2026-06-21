@@ -32,7 +32,7 @@ I am writing this game to literally reinforce my knowledge of Python, but that d
 * Installed **Python 3.8** or higher
 
 ## How to launch:
-1. Open the terminal (console) in the `src` folder of the project
+1. Open the terminal (console) in the root folder of the project
 2. Run the command:
 ```bash
 python main.py
@@ -68,7 +68,7 @@ python main.py
 * Установленный **Python 3.8** или выше
 
 ### Как запустить:
-1. Откройте терминал (консоль) в папке `src` проекта
+1. Откройте терминал (консоль) в корневой папке проекта
 2. Запустите команду:
 ```bash
 python main.py
