@@ -1,4 +1,5 @@
 from Fallout_Engine.inventory import Inventory
+from Fallout_Engine.item import Weapon
 
 class Player:
     def __init__(self, name, st, per, end, cha, inte, agi, luc):
@@ -11,6 +12,7 @@ class Player:
         self.luc = luc
         self.name = name
         self.inventory = Inventory()
+        self.equipped_weapon = Weapon("Кулаки", weight=0, price=0, min_damage=1, max_damage=3, ammo_type=None, ap=3, damage_type="normal")
 
         self.max_hp = 15 + self.st + (self.end * 2)
         self.current_hp = self.max_hp

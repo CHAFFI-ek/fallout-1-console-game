@@ -1,5 +1,8 @@
 from Fallout_Engine.special import Player 
 from Fallout_Engine.locations import Sector
+from Fallout_Engine.combat import CombatManager
+from Fallout1_Game.monsters import cave_rat
+from Fallout_Engine.item import Weapon
 
 class Loop:
     def __init__(self):
@@ -54,12 +57,21 @@ class Loop:
                     print("Введено неизвестное значение")
             elif self.state == "EXPLORE":
                 print(f"===== Локация: {self.current_sector.name} =====")
+                if self.player is not None:
+                    print(f"Ваше здоровье: {self.player.current_hp}/{self.player.max_hp}")
                 print(self.current_sector.description)
 
+                if hasattr(self.current_sector, 'enemies') and self.current_sector.enemies:
+                    enemy_count = len(self.current_sector.enemies)
+                    enemy_name = self.current_sector.enemies[0].name
+
+                    print(f"Вокруг обноружены угрозы: {enemy_name} (Количество: {enemy_count})")
+                    print(f"--> Доступно действие: 5. Напасть на ближайшего противника")
+
                 if self.current_sector.name == "Улица Шэйди Сэндс":
-                    print("--> 5. Войти в магазин")
+                    print("--> 6. Войти в магазин")
                 elif self.current_sector.name == "Магазин Шэйди Сэндс":
-                    print("--> 5. Выйти на улицу")
+                    print("--> 6. Выйти на улицу")
 
                 print("1. Открыть pip-boy 2000 \n2. Открыть инвентарь \n3. Глобальная карта \n4. Выйти в меню")
                 choice1 = input("Введите действие: ")
@@ -68,14 +80,62 @@ class Loop:
                 if choice1 == "1":
                     self.state = "PIP_BOY"
                 elif choice1 == "2":
-                    print("Пока недоступно")
+                    print("===== Инвентарь =====")
+                    if not self.player.inventory.items:
+                        print("Ваш рюкзак абсолютно пуст")
+                    else:
+                        print("Содержимое рюкзака:")
+                        for index1, item in enumerate(self.player.inventory.items, 1):
+                            print(f"{index1}. {item.name} (Вес: {item.weight} фунтов)")
+
+                    total_w = self.player.inventory.get_total_weight()
+                    print("-------------------------")
+                    print(f"Общий вес: {total_w}/{self.player.max_weight} фунтов")
+                    print("=========================")
+
+                    if self.player.inventory.items:
+                        print("Хотите осмотреть предмет? Введите его номер (или Enter чтобы закрыть инвентарь)")
+                        choice_inv = input("> ")
+                        if choice_inv.isdigit():
+                            item_idx = int(choice_inv) - 1
+                            if 0 <= item_idx < len(self.player.inventory.items):
+                                selected_item = self.player.inventory.items[item_idx]
+                                self.player.inventory.inspect_item(selected_item)
+                            else:
+                                print("Неверный номер")
+                                
                 elif choice1 == "3":
-                    self.state = "WORLD_MAP"
+                    if hasattr(self.current_sector, 'enemies') and self.current_sector.enemies:
+                        print("Вы не можете сбежать! Путь перекрыт врагами")
+                    else:
+                        self.state = "WORLD_MAP"
                 elif choice1 == "4":
                     self.state = "MAIN_MENU"
-                elif choice1 == "5" and self.current_sector.name == "Улица Шэйди Сэндс":
+                elif choice1 == "5" and hasattr(self.current_sector, 'enemies') and self.current_sector.enemies:
+                    self.state = "COMBAT"
+                    current_enemy = self.current_sector.enemies[0]
+                    print(f"На вас напал {current_enemy.name}!")
+
+                    combat = CombatManager(self.player, current_enemy)
+
+                    while self.player.current_hp > 0 and current_enemy.current_hp > 0:
+                        combat.player_turn()
+                        combat.enemy_turn()
+
+                        combat.player_ap = self.player.ap
+                        combat.enemy_ap = current_enemy.ap
+
+                    if self.player.current_hp <= 0:
+                        print("Вы погибли в пустоши, вы отважно сражались, но пустошь оказалась слишком сильной для вас... Игра окончена")
+                        self.state = "MAIN_MENU"
+                    else:
+                        print(f"Вы убили {current_enemy.name}!")
+                        self.current_sector.enemies.remove(current_enemy)
+                        self.state = "EXPLORE"
+
+                elif choice1 == "6" and self.current_sector.name == "Улица Шэйди Сэндс":
                     self.current_sector = self.game_locations["Шэйди Сэндс"]["Магазин"]
-                elif choice1 == "5" and self.current_sector.name == "Магазин Шэйди Сэндс":
+                elif choice1 == "6" and self.current_sector.name == "Магазин Шэйди Сэндс":
                     self.current_sector = self.game_locations["Шэйди Сэндс"]["Улица"]
                 else:
                     print("Введено неизвестное значение")
@@ -221,7 +281,28 @@ class Loop:
                         if self.points == 0:
                             name = input("Введите имя вашего персонажа: ")
                             self.player = Player(name, self.st, self.per, self.end, self.cha, self.inte, self.agi, self.luc)
+                            
+                            self.player.equipped_weapon = Weapon("Кулаки", 0, 0, 1, 3, None, 3, "normal")
+
                             self.current_sector = self.game_locations["Убежище 13"]["Пещера"]
+
+                            rat1 = cave_rat()
+                            rat1.equipped_weapon = Weapon("Зубы", 0, 0, 1, 4, None, 4, "normal")
+                            rat1.max_hp = 6
+                            rat1.current_hp = 6
+
+                            rat2 = cave_rat()
+                            rat2.equipped_weapon = Weapon("Зубы", 0, 0, 1, 4, None, 4, "normal")
+                            rat2.max_hp = 6
+                            rat2.current_hp = 6
+
+                            rat3 = cave_rat()
+                            rat3.equipped_weapon = Weapon("Зубы", 0, 0, 1, 4, None, 4, "normal")
+                            rat3.max_hp = 6
+                            rat3.current_hp = 6
+
+                            self.current_sector.enemies = [rat1, rat2, rat3]
+
                             self.state = "EXPLORE"
                             break
                         else:
