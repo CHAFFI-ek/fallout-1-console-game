@@ -12,4 +12,6 @@ def cave_rat():
     rat.current_hp = 6
     rat.equipped_weapon = Weapon("Зубы", weight=0, price=0, min_damage=1, max_damage=4, ammo_type=None, ap=4, damage_type="normal")
 
+    rat.xp_reward = 25
+
     return rat

@@ -138,6 +138,10 @@ class Loop:
                         self.state = "MAIN_MENU"
                     else:
                         print(f"Вы убили {current_enemy.name}!")
+
+                        if hasattr(current_enemy, 'xp_reward'):
+                            self.player.add_xp(current_enemy.xp_reward)
+                            
                         self.current_sector.enemies.remove(current_enemy)
                         self.state = "EXPLORE"
 
@@ -372,7 +376,7 @@ class Loop:
                         self.time_maneger.advance_time(travel_time)
                         import time
                         self.time_maneger.last_real_time = time.time()
-                        
+
                         self.current_sector = self.game_locations["Убежище 13"]["Пещера"]
                         self.state = "EXPLORE"
 

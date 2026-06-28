@@ -23,11 +23,62 @@ class Player:
         self.sp = 5 * (self.inte * 2)
         self.ac = self.agi
 
+        self.level = 1
+        self.xp = 0
+        
+        self.xp_next_level = int(((self.level + 1) * self.level) / 2) * 1000
+
+        self.skill_points = 0
+
+        self.skills = {
+            "Легкое оружие": 30,
+            "Скрытность": 20,
+            "Воровство": 15
+        }
+
     def show_stats(self):
+        print(f"===== Характеристики: {self.name.upper()} =====")
+        print(f"Уровень: {self.level} | Опыт: {self.xp}/{self.xp_next_level} XP")
+        print(f"Доступно очков навыков: {self.skill_points}")
+        print(f"Здоровье (HP): {self.current_hp}/{self.max_hp}")
+        print(f"Очки Действия (AP): {self.ap}")
+        print("--------------------")
         print(f"Сила: {self.st}")
         print(f"Восприятие: {self.per}")
-        print(f"Выносливость:{self.end}")
+        print(f"Выносливость: {self.end}")
         print(f"Харизма: {self.cha}")
         print(f"Интеллект: {self.inte}")
         print(f"Ловкость: {self.agi}")
         print(f"Удача: {self.luc}")
+    
+    def add_xp(self, amount):
+        if self.level >= 21:
+            print("Вы достигли максимального уровня (21)!")
+            return
+        
+        self.xp += amount
+        print(f"Получено {amount} опыта (Текущий: {self.xp}/{self.xp_next_level} XP)")
+
+        while self.xp >= self.xp_next_level and self.level < 21:
+            self.level += 1
+
+            added_skills = 5 + (2 * self.inte)
+            self.skill_points += added_skills
+
+            hp_gain = 3 + (self.end // 2)
+            self.max_hp += hp_gain
+
+            self.current_hp = self.max_hp
+
+            if self.level < 21:
+                self.xp_next_level = int(((self.level + 1) * self.level) / 2) * 1000
+            else:
+                self.xp_next_level = self.xp
+            
+            print(f"Вы достигли {self.level} уровня!")
+            print(f"Максимальное здоровье увеличилось на +{hp_gain} (Теперь: {self.max_hp})")
+            print(f"Получено очков навыков: +{added_skills} (Всего доступно: {self.skill_points})")
+            if self.level < 21:
+                print(f"Следующий уровень на: {self.xp_next_level} XP")
+            else:
+                print("Вы достигли макс. уровня. Вы - легенда пустоши!")
