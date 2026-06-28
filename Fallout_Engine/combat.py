@@ -27,14 +27,14 @@ class CombatManager:
             crit_roll = random.randint(1, 100)
             if crit_roll <= attacker.crit_chance:
                 damage *= 2
-                print("Критический удар!")
+                self.loop.add_log("Критический удар!")
             
-            print(f" {attacker.name} наносит {damage} урона по {defender.name}")
+            self.loop.add_log(f"{attacker.name} наносит {damage} урона по {defender.name}")
             defender.current_hp -= damage
             if defender.current_hp < 0:
                 defender.current_hp = 0
         else:
-            print(f"{attacker.name} промахнулся!")
+            self.loop.add_log(f"{attacker.name} промахнулся!")
 
     def player_turn(self):
         while self.player_ap > 0 and self.enemy.current_hp > 0:

@@ -2,7 +2,7 @@ from Fallout_Engine.inventory import Inventory
 from Fallout_Engine.item import Weapon
 
 class Player:
-    def __init__(self, name, st, per, end, cha, inte, agi, luc):
+    def __init__(self, name, st, per, end, cha, inte, agi, luc, game_loop=None):
         self.st = st
         self.per = per
         self.end = end
@@ -36,6 +36,8 @@ class Player:
             "Воровство": 15
         }
 
+        self.loop = game_loop
+
     def show_stats(self):
         print(f"===== Характеристики: {self.name.upper()} =====")
         print(f"Уровень: {self.level} | Опыт: {self.xp}/{self.xp_next_level} XP")
@@ -53,11 +55,12 @@ class Player:
     
     def add_xp(self, amount):
         if self.level >= 21:
-            print("Вы достигли максимального уровня (21)!")
+            if self.loop: self.loop.add_log("Вы достигли максимального уровня (21)!")
             return
         
         self.xp += amount
-        print(f"Получено {amount} опыта (Текущий: {self.xp}/{self.xp_next_level} XP)")
+        if self.loop:
+            self.loop.add_log(f"Получено {amount} опыта (Текущий: {self.xp}/{self.xp_next_level} XP)")
 
         while self.xp >= self.xp_next_level and self.level < 21:
             self.level += 1
@@ -75,10 +78,11 @@ class Player:
             else:
                 self.xp_next_level = self.xp
             
-            print(f"Вы достигли {self.level} уровня!")
-            print(f"Максимальное здоровье увеличилось на +{hp_gain} (Теперь: {self.max_hp})")
-            print(f"Получено очков навыков: +{added_skills} (Всего доступно: {self.skill_points})")
-            if self.level < 21:
-                print(f"Следующий уровень на: {self.xp_next_level} XP")
-            else:
-                print("Вы достигли макс. уровня. Вы - легенда пустоши!")
+            if self.loop:
+                self.loop.add_log(f"Вы достигли {self.level} уровня!")
+                self.loop.add_log(f"Максимальное здоровье увеличилось на +{hp_gain} (Теперь: {self.max_hp})")
+                self.loop.add_log(f"Получено очков навыков: +{added_skills} (Всего доступно: {self.skill_points})")
+                if self.level < 21:
+                    self.loop.add_log(f"Следующий уровень на: {self.xp_next_level} XP")
+                else:
+                    self.loop.add_log("Вы достигли макс. уровня. Вы - легенда пустоши!")

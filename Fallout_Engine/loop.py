@@ -42,6 +42,8 @@ class Loop:
 
         self.time_maneger = TimeManager()
 
+        self.game_log = []
+
     def run(self):
         while self.running:
             if self.state == "MAIN_MENU":
@@ -66,6 +68,12 @@ class Loop:
                 if self.player is not None:
                     print(f"Ваше здоровье: {self.player.current_hp}/{self.player.max_hp}")
                 print(self.current_sector.description)
+
+                if self.game_log:
+                    print("Логи: ")
+                    for msg in self.game_log:
+                        print(f"> {msg}")
+                    print("--------------------")
 
                 if hasattr(self.current_sector, 'enemies') and self.current_sector.enemies:
                     enemy_count = len(self.current_sector.enemies)
@@ -137,11 +145,11 @@ class Loop:
                         print("Вы погибли в пустоши, вы отважно сражались, но пустошь оказалась слишком сильной для вас... Игра окончена")
                         self.state = "MAIN_MENU"
                     else:
-                        print(f"Вы убили {current_enemy.name}!")
+                        self.add_log(f"Вы убили {current_enemy.name}!")
 
                         if hasattr(current_enemy, 'xp_reward'):
                             self.player.add_xp(current_enemy.xp_reward)
-                            
+
                         self.current_sector.enemies.remove(current_enemy)
                         self.state = "EXPLORE"
 
@@ -309,11 +317,13 @@ class Loop:
                     elif choice_spec == "8":
                         if self.points == 0:
                             name = input("Введите имя вашего персонажа: ")
-                            self.player = Player(name, self.st, self.per, self.end, self.cha, self.inte, self.agi, self.luc)
+                            self.player = Player(name, self.st, self.per, self.end, self.cha, self.inte, self.agi, self.luc, self)
                             
                             self.player.equipped_weapon = Weapon("Кулаки", 0, 0, 1, 3, None, 3, "normal")
 
                             self.current_sector = self.game_locations["Убежище 13"]["Пещера"]
+
+                            self.add_log("Вы покинули Убежище 13. Гермодверь тяжело закрылась за вашей спиной. Теперь вам предстоит найти водяной чип")
 
                             rat1 = cave_rat()
                             rat1.equipped_weapon = Weapon("Зубы", 0, 0, 1, 4, None, 4, "normal")
@@ -383,7 +393,7 @@ class Loop:
                     elif chosen_location == "Убежище 15":
                         if self.world_map["Шэйди Сэндс"] == False:
                             self.world_map["Шэйди Сэндс"] = True
-                            print("Вы нашли новое поселение: Шэйди Сэндс")
+                            self.add_log("[!] Вы нашли новое поселение: Шэйди Сэндс")
                         
                         if "Шэйди Сэндс" in self.current_sector.name:
                             travel_time = 86400
@@ -411,6 +421,11 @@ class Loop:
                         self.state = "EXPLORE"
                     else:
                         print("Неизвестное действие")
+    
+    def add_log(self, text):
+        self.game_log.append(text)
+        if len(self.game_log) > 8:
+            self.game_log.pop(0)
 
                 
                     
