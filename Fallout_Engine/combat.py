@@ -1,9 +1,11 @@
 import random
 
 class CombatManager:
-    def __init__(self, player, enemy):
+    def __init__(self, player, enemy, game_loop):
         self.player = player
         self.enemy = enemy
+
+        self.loop = game_loop
 
         self.player_ap = player.ap
         self.enemy_ap = enemy.ap

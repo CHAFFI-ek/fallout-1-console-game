@@ -3,6 +3,7 @@ from Fallout_Engine.locations import Sector
 from Fallout_Engine.combat import CombatManager
 from Fallout1_Game.monsters import cave_rat
 from Fallout_Engine.item import Weapon
+from Fallout_Engine.time_sys import TimeManager
 
 class Loop:
     def __init__(self):
@@ -39,6 +40,8 @@ class Loop:
 
         self.current_sector = None
 
+        self.time_maneger = TimeManager()
+
     def run(self):
         while self.running:
             if self.state == "MAIN_MENU":
@@ -56,7 +59,10 @@ class Loop:
                 else:
                     print("Введено неизвестное значение")
             elif self.state == "EXPLORE":
+                self.time_maneger.update_real_time()
+
                 print(f"===== Локация: {self.current_sector.name} =====")
+                print(f"Текущее время: {self.time_maneger.get_time_string()}")
                 if self.player is not None:
                     print(f"Ваше здоровье: {self.player.current_hp}/{self.player.max_hp}")
                 print(self.current_sector.description)
@@ -116,7 +122,7 @@ class Loop:
                     current_enemy = self.current_sector.enemies[0]
                     print(f"На вас напал {current_enemy.name}!")
 
-                    combat = CombatManager(self.player, current_enemy)
+                    combat = CombatManager(self.player, current_enemy, self)
 
                     while self.player.current_hp > 0 and current_enemy.current_hp > 0:
                         combat.player_turn()
@@ -124,6 +130,8 @@ class Loop:
 
                         combat.player_ap = self.player.ap
                         combat.enemy_ap = current_enemy.ap
+
+                        self.time_maneger.advance_time(6)
 
                     if self.player.current_hp <= 0:
                         print("Вы погибли в пустоши, вы отважно сражались, но пустошь оказалась слишком сильной для вас... Игра окончена")
@@ -157,9 +165,26 @@ class Loop:
                 elif choice_pip == "2":
                     print("Голодисков не найдено")
                 elif choice_pip == "3":
-                    print("В этой зоне отдых недоступен")
+                    print("===== Отдых =====")
+                    print("1. Отдохнуть 8 часов")
+                    print("2. Отмена")
+                    alarm_choise = input("Введите действие: ")
+
+                    if alarm_choise == "1":
+                        self.time_maneger.advance_time(28800)
+                        import time
+                        self.time_maneger.last_real_time = time.time()
+
+                        self.player.current_hp = self.player.max_hp
+                        print("Вы отдохнули и восстановили свое здоровье")
+                        print(f"Текущее время: {self.time_maneger.get_time_string()}")
+                    elif alarm_choise == "2":
+                        print("Вы передумали отдыхать")
+                    else:
+                        print("Введено неизвестное значение")
+                    
                 elif choice_pip == "4":
-                    print("Часы пока не работают")
+                    print(f"Время: {self.time_maneger.get_time_string()}")
                 elif choice_pip == "5":
                     self.state = "EXPLORE"
                 else:
@@ -337,6 +362,17 @@ class Loop:
                             break
 
                     if chosen_location == "Убежище 13":
+                        if "Шэйди Сэндс" in self.current_sector.name:
+                            travel_time = 86400
+                            print("Дорога заняла 1 день")
+                        else:
+                            travel_time = 172800
+                            print("Дорога заняла 2 дня")
+
+                        self.time_maneger.advance_time(travel_time)
+                        import time
+                        self.time_maneger.last_real_time = time.time()
+                        
                         self.current_sector = self.game_locations["Убежище 13"]["Пещера"]
                         self.state = "EXPLORE"
 
@@ -345,10 +381,28 @@ class Loop:
                             self.world_map["Шэйди Сэндс"] = True
                             print("Вы нашли новое поселение: Шэйди Сэндс")
                         
+                        if "Шэйди Сэндс" in self.current_sector.name:
+                            travel_time = 86400
+                            print("Дорога заняла 1 день")
+                        else:
+                            travel_time = 172800
+                            print("Дорога заняла 2 дня")
+
+                        self.time_maneger.advance_time(travel_time)
+                        import time
+                        self.time_maneger.last_real_time = time.time()
+                        
                         self.current_sector = self.game_locations["Убежище 15"]["Улица"]
                         self.state = "EXPLORE"
 
                     elif chosen_location == "Шэйди Сэндс":
+                        travel_time = 86400
+                        print("Дорога заняла 1 день")
+
+                        self.time_maneger.advance_time(travel_time)
+                        import time
+                        self.time_maneger.last_real_time = time.time()
+
                         self.current_sector = self.game_locations["Шэйди Сэндс"]["Улица"]
                         self.state = "EXPLORE"
                     else:
