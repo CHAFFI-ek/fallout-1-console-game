@@ -19,11 +19,12 @@ I am writing this game to literally reinforce my knowledge of Python, but that d
 * **Global map with triggers**
 * **Turn-based combat with action points (AP)**
 * **Item and inventory system**
+* **Experience and level system**
 
 ### What I want to add:
 * **Dialogues and trading with NPCs**
-* **Experience and level system**
 * **Fully port the storyline of Fallout 1**
+* **Random encounters and companions**
 * **And much more!**
 
 ## Launch Instructions
@@ -55,11 +56,12 @@ python main.py
 * **Глобальная карта с триггерами**
 * **Пошаговый бой с очками действия (AP)**
 * **Система предметов и инвентаря**
+* **Система опыта и уровней**
 
 ### Что хочу добавить:
 * **Диалоги и торговлю с NPC**
-* **Систему опыта и уровней**
 * **Перенести полноценно сюжет Fallout 1**
+* **Случайные встречи и напарников**
 * **И многое другое!**
 
 ## Инструкция по запуску
